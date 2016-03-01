@@ -5,6 +5,10 @@
  */
 package fileobserver;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -18,12 +22,24 @@ public class KVFile {
     
     public KVFile() {
     }
-    public KVFile(String name, byte[] kvFileData) {
-        this.name = name;
-        this.content = kvFileData.clone();        
+    public KVFile(String name, byte[] KVFileData) {
+        this.name = name;     
+        this.content = KVFileData.clone();
     }
-    public void set(String name, byte[] kvFileData) {
-        this.name = name;
+    public KVFile(String name) {
+        this.name = name;     
+    }
+    public void readAndRenderKVFile(String fileName) throws FileNotFoundException, IOException {
+           
+        BufferedInputStream file = new BufferedInputStream(new FileInputStream(fileName));
+        byte[] buf = new byte[file.available()];
+        file.read(buf, 0, file.available());
+        this.set(buf);   
+        System.out.println("Open file: " + this.getName());
+        System.out.println("file size: " + this.getSize());
+        file.close();
+    }
+    private void set(byte[] kvFileData) {
         this.content = kvFileData.clone();
     }
     
@@ -51,6 +67,7 @@ public class KVFile {
             ofst += kvpair.getKeySize();        
             //read value
             Varint valueHeader = new Varint(Arrays.copyOfRange(this.content, ofst, ofst + 4));
+//            valueHeader.show();
             ofst += valueHeader.getSize();
             kvpair.setValue(Arrays.copyOfRange(this.content, ofst, ofst + valueHeader.getValue()));
             ofst += kvpair.getValueSize();
@@ -62,12 +79,11 @@ public class KVFile {
 //        for ()
         return kvpairs;
     }
-    public Vector<Sqlite4Record> toSqlite4Records() {
-        
-         Vector<KVpair> kvpairs = this.toKVPairs();
+    public Vector<Sqlite4Record> toSqlite4Records() {        
 //        System.out.println("Get " + kvpairs.size() + " KVpairs in file.");
         Vector<Sqlite4Record> records = new Vector<Sqlite4Record>();
-        for (KVpair pair:kvpairs) {
+        
+        for (KVpair pair:this.toKVPairs()) {
             records.addElement(pair.toSqlite4Record());
         }
         

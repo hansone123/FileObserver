@@ -5,6 +5,7 @@
  */
 package fileobserver;
 
+import static fileobserver.Sqlite4ColumnType.*;
 import java.util.Arrays;
 
 /**
@@ -26,8 +27,40 @@ public class Sqlite4Col {
     public void setName(String name) {
         this.name = name;
     }
-    public void setValue(byte[] value) {
-        this.value = value.clone();
+    public void setColumnValue(byte[] valueOfColumn) {
+        switch (this.type) {
+            case STR:
+                byte firstByte = valueOfColumn[0];
+                if (firstByte > (byte)0x02) {
+                    this.type = UTF8;
+                    this.setValue(valueOfColumn);                    
+                }
+                if (firstByte == (byte)0x00) {
+                    this.type = UTF8;
+                    this.setValue(Arrays.copyOfRange(valueOfColumn, 1, valueOfColumn.length));
+                }
+                if (firstByte == (byte)0x01) {
+                    this.type = UTF16LE;
+                    this.setValue(Arrays.copyOfRange(valueOfColumn, 1, valueOfColumn.length));
+                }
+                if (firstByte == (byte)0x02) {
+                    this.type = UTF16BE;
+                    this.setValue(Arrays.copyOfRange(valueOfColumn, 1, valueOfColumn.length));
+                }
+                break;
+            case NULL:
+            case ONE:
+            case ZERO:
+            case OTHER:
+                break;
+            case BLOB:
+            case INT:
+            case REAL:
+            default:
+                this.setValue(valueOfColumn);
+                break;
+        
+        }
     }
 
     /**
@@ -39,11 +72,29 @@ public class Sqlite4Col {
      *}
      *
      */
-    public void setType(Sqlite4ColumnType type) {
+    public void setColumnType(Sqlite4ColumnType type) {
         this.type = type;
+    }
+    public void setValue(byte[] buf) {
+        this.value = buf.clone();
+    }
+    public void SetColumnTypeAndValue(HeaderOfKValue hdr, byte[] KVpairValueArray) {
+        
+        this.setColumnType(hdr.type);
+        if (hdr.sizeOfValue > 0) {
+            this.setColumnValue(Arrays.copyOfRange(KVpairValueArray, hdr.ofstOfValue, hdr.ofstOfValue + hdr.sizeOfValue ));
+        }
+    }
+    public String getName() {
+        return this.name;
     }
     public byte[] getValue() {
         return this.value;
+    }
+    public int getSize() {
+        if (this.value == null)
+            return 0;
+        return this.value.length;
     }
 
     /**
@@ -57,14 +108,17 @@ public class Sqlite4Col {
     public Sqlite4ColumnType getType() {
         return this.type;
     }
-    public void SetColumnTypeAndValue(HeaderOfKValue hdr, byte[] input) {
-        
-        this.setType(hdr.type);
-        this.setValue(Arrays.copyOfRange(input, hdr.ofstOfValue, hdr.ofstOfValue + hdr.sizeOfValue-1));
-        
+    public void show() {
+        System.out.println("Column Information");
+        System.out.println("  name: " + this.getName());
+        System.out.println("  type: " + this.getType());
+        System.out.println("  size: " + this.getSize());
     }
     
     public static void main(String args[]) {
-        
+        int a[] = {1,9,10,4,5,6,7,8};
+        int b[] = Arrays.copyOfRange(a, 5, 8);
+                for (int c:b)
+                    System.out.println(c + " ");
     }
 }

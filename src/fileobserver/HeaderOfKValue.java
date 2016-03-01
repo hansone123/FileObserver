@@ -71,8 +71,10 @@ public class HeaderOfKValue {
         this.ofstOfValue = value;
     }
     public void show() {
-        System.out.println("ofst of data:" + this.ofstOfValue);
-        System.out.println("size of data" + this.sizeOfValue);
-        System.out.println("type:" + this.type);
+        System.out.println("---------------------------");
+        System.out.println("type: " + this.type);
+        System.out.println("ofst of data: " + this.ofstOfValue);
+        System.out.println("size of data: " + this.sizeOfValue);
+        
     }
 }

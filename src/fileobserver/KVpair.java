@@ -46,10 +46,10 @@ public class KVpair {
         Sqlite4Record result = new Sqlite4Record();
         result.setTableID(this.decodeTableID());
         //Get Schema 
-        TableSchema schema = new TableSchema();
-        schema.readFromFile();
+//        TableSchema schema = new TableSchema();
+//        schema.readFromFile();
         //set Table Name
-        result.setTableName(schema.getTableName());
+//        result.setTableName(schema.getTableName());
         //set colnames
         
         //decode the header
@@ -58,27 +58,23 @@ public class KVpair {
         //decode the value
         int i=0;
         for (HeaderOfKValue hdr:hdrs) {
-//            System.out.println("Hdr num:" + i);
 //            hdr.show();
             Sqlite4Col col = new Sqlite4Col();
             col.SetColumnTypeAndValue(hdr, this.value);
             result.addColumn(col);
-            i++;
         }
         
         return result;
     }
-    private Vector<HeaderOfKValue> getHdrsOfColumns(byte[] buf) {
-        Varint firstHdr = new Varint(buf);
+    private Vector<HeaderOfKValue> getHdrsOfColumns(byte[] KVpairValueArray) {
+        Varint firstHdr = new Varint(KVpairValueArray);
         int headerStart = firstHdr.getSize();  
         int headerEnd = headerStart + firstHdr.getValue() -1;
         int dataOfst = firstHdr.getSize() + firstHdr.getValue();
         int hdrOfst = headerStart;
         Vector<HeaderOfKValue> hdrs = new Vector<HeaderOfKValue>();
         while( hdrOfst <= headerEnd ) {
-            Varint hdr = new Varint();
-            hdr.set(Arrays.copyOfRange(buf, hdrOfst, hdrOfst + 4));
-            
+            Varint hdr = new Varint(Arrays.copyOfRange(KVpairValueArray, hdrOfst, hdrOfst + 4));
             HeaderOfKValue kvhdr = new HeaderOfKValue();
             kvhdr.setTypeAndSize(hdr.getValue());
             kvhdr.setOfstOfValue(dataOfst);

@@ -60,8 +60,9 @@ public class Varint {
         return this.size;
     }
     public void show(){
-        System.out.println(this.getValue());
-        System.out.println(this.getSize());
+        
+        System.out.println("Varint value:" + this.getValue());
+        System.out.println("Varint size:" + this.getSize());
     }
     public static void main(String[] args) {
 //        //*test long range :**/

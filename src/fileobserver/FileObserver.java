@@ -23,13 +23,17 @@ public class FileObserver {
     public boolean setValidDirectoryPath(String dirPath) {
         
         this.directoryPath = dirPath;    
-        return this.dirIsExisted();
+        return this.dirIsExisted(this.directoryPath);
     }
     
-    public boolean dirIsExisted() {
+    public boolean dirIsExisted(String dir) {
         
-        File directory = new File(this.directoryPath);
-        return (directory.exists()  && directory.isDirectory());
+        File directory = new File(dir);
+        if ((directory.exists()  && directory.isDirectory())) {
+            System.out.println("FileObserver directory path set to: " + this.directoryPath);
+            return true;
+        }
+        return false;
     }
     
     public String chooseFile() {
@@ -65,8 +69,7 @@ public class FileObserver {
     }
     public int pushToPhoenix(KVFile kvfile) {
         
-        Vector<Sqlite4Record> records = kvfile.toSqlite4Records();
-        for (Sqlite4Record record:records) {
+        for (Sqlite4Record record:kvfile.toSqlite4Records()) {
             this.sendAQuery(record);
             
         }
@@ -74,24 +77,29 @@ public class FileObserver {
         return SuccessedNumberOfRecord;
     }
     public boolean sendAQuery(Sqlite4Record record) {
-        Vector<Sqlite4Col> cols = record.getColumns();
-        for (Sqlite4Col col : cols) {
-            
+        
+        for (Sqlite4Col col : record.getColumns()) {
+            col.show();
+            Sqlite4Decoder decoder = new Sqlite4Decoder();
+            System.out.println("  value: " + decoder.fromColToString(col));
         }
         return true;
     }
-    public void keepWatchOnDirectoryAndPush() {
+    public void keepWatchOnDirectoryAndDoEvent() {
+        
         while(true) {
             String file = this.chooseFile();
             System.out.println("Choose file: " + file);
             try{
-                KVFile kvfile = this.readAndRenderKVFile(file);
+                KVFile kvfile = new KVFile(file);
+                kvfile.readAndRenderKVFile(file);                
                 this.pushToPhoenix(kvfile);
                 this.deleteFile(file);
                 
             } catch(IOException e) {
                 System.out.println("Directory has no file.");
             }
+            break;
         }
     }
 //    public String observeDirectory() {
@@ -115,7 +123,7 @@ public class FileObserver {
             return;
         }
         
-        fileObserver.keepWatchOnDirectoryAndPush();
+        fileObserver.keepWatchOnDirectoryAndDoEvent();
             
 //            try{
 //                KVFile kvf = fileObserver.readAndRenderKVFile("/tmp/KVoutput/2016_02_24_19:08:13_1.kv");
@@ -125,8 +133,6 @@ public class FileObserver {
 //                
 //            }
             
-        
-        
     }
     
 }

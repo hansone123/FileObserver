@@ -17,9 +17,9 @@ public class TableSchema {
     private Vector<String> colnames;
     
     public void readFromFile(String name) {
-        setTableName();
-        setTableID();
-        setColNames();
+//        setTableName();
+//        setTableID();
+//        setColNames();
     }
     public void setTableName(String name) {
         this.tableName = name;
