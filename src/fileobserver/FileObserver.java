@@ -38,8 +38,10 @@ public class FileObserver {
     
     public String chooseFile() {
        
-        if (this.dirIsEmpty())
+        if (this.dirIsEmpty()) {
+            System.out.println("Directory is empty");
             return null;
+        }
         
         File directory = new File(this.directoryPath);
         String[] allFiles = directory.list();        
@@ -48,7 +50,9 @@ public class FileObserver {
             if (result.compareTo(file) > 0)
                 result = file;
         }
-        return this.directoryPath + "//" + result;
+        result = this.directoryPath + "//" + result;
+        System.out.println("Choose file: " + result);
+        return result;
     }
     public boolean dirIsEmpty() {
         File directory = new File(this.directoryPath);
@@ -85,19 +89,27 @@ public class FileObserver {
         }
         return true;
     }
-    public void keepWatchOnDirectoryAndDoEvent() {
-        
-        while(true) {
-            String file = this.chooseFile();
-            System.out.println("Choose file: " + file);
-            try{
-                KVFile kvfile = new KVFile(file);
-                kvfile.readAndRenderKVFile(file);                
+    public boolean doJob(String Filename ) {
+        try{
+                KVFile kvfile = new KVFile(Filename);
+                kvfile.readAndRenderKVFile(Filename);                
                 this.pushToPhoenix(kvfile);
-                this.deleteFile(file);
+                this.deleteFile(Filename);
                 
             } catch(IOException e) {
-                System.out.println("Directory has no file.");
+                return false;
+            }
+        return true;
+    }
+    public void keepWatchOnDirectoryAndDoJob() {
+        
+        while(true) {
+            String fileName = this.chooseFile();
+            if (fileName == null) {
+                continue;
+            }
+            if (this.doJob(fileName)) {
+                System.out.println("Do Job successed!");
             }
             break;
         }
@@ -123,7 +135,7 @@ public class FileObserver {
             return;
         }
         
-        fileObserver.keepWatchOnDirectoryAndDoEvent();
+        fileObserver.keepWatchOnDirectoryAndDoJob();
             
 //            try{
 //                KVFile kvf = fileObserver.readAndRenderKVFile("/tmp/KVoutput/2016_02_24_19:08:13_1.kv");
