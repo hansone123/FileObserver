@@ -89,28 +89,29 @@ public class FileObserver {
         }
         return true;
     }
-    public boolean doJob(String Filename ) {
+    public void doJob(String Filename ) {
         try{
                 KVFile kvfile = new KVFile(Filename);
                 kvfile.readAndRenderKVFile(Filename);                
                 this.pushToPhoenix(kvfile);
-                this.deleteFile(Filename);
                 
             } catch(IOException e) {
-                return false;
+                System.out.println("Do Job failed!");
             }
-        return true;
+        System.out.println("Do Job successed!");
     }
     public void keepWatchOnDirectoryAndDoJob() {
         
         while(true) {
             String fileName = this.chooseFile();
+            
             if (fileName == null) {
                 continue;
             }
-            if (this.doJob(fileName)) {
-                System.out.println("Do Job successed!");
-            }
+            
+            this.doJob(fileName);
+            this.deleteFile(fileName);
+            
             break;
         }
     }
@@ -130,12 +131,12 @@ public class FileObserver {
      */
     public static void main(String[] args) throws IOException {
         // TODO code application logic here
-        FileObserver fileObserver = new FileObserver();
-        if( !fileObserver.setValidDirectoryPath("/tmp/KVoutput") )  {            
+        FileObserver kvfileObserver = new FileObserver();
+        if( !kvfileObserver.setValidDirectoryPath("/tmp/KVoutput") )  {            
             return;
         }
         
-        fileObserver.keepWatchOnDirectoryAndDoJob();
+        kvfileObserver.keepWatchOnDirectoryAndDoJob();
             
 //            try{
 //                KVFile kvf = fileObserver.readAndRenderKVFile("/tmp/KVoutput/2016_02_24_19:08:13_1.kv");
