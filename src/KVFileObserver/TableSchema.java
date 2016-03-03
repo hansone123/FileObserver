@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fileobserver;
+package KVFileObserver;
 
 import java.util.Vector;
 
@@ -39,5 +39,11 @@ public class TableSchema {
     }
     public Vector<String> getColNames() {
         return this.colnames;
+    }
+    
+    public static void main(String args[]) {
+        TableSchema schema = new TableSchema();
+        String filename = "";
+        schema.readFromFile(filename);
     }
 }

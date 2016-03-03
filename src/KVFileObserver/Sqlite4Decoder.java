@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fileobserver;
+package KVFileObserver;
 
-import static fileobserver.Sqlite4ColumnType.*;
+import static KVFileObserver.Sqlite4ColumnType.*;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.logging.Level;

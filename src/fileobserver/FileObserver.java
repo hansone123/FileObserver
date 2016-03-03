@@ -17,16 +17,24 @@ import java.util.Vector;
  * @author hansone123
  */
 public class FileObserver {
-    private String directoryPath;
     
+    public String directoryPath;
+    public String fileExtension;
     
+    public FileObserver() {
+        this.directoryPath = "";
+        this.fileExtension = "";
+    }
+    public void setFileExtension(String extension) {
+        this.fileExtension = extension;
+    }
     public boolean setValidDirectoryPath(String dirPath) {
         
         this.directoryPath = dirPath;    
         return this.dirIsExisted(this.directoryPath);
     }
     
-    public boolean dirIsExisted(String dir) {
+    private boolean dirIsExisted(String dir) {
         
         File directory = new File(dir);
         if ((directory.exists()  && directory.isDirectory())) {
@@ -36,91 +44,78 @@ public class FileObserver {
         return false;
     }
     
-    public String chooseFile() {
-       
+    private String chooseFile() {
+        String result = "";
         if (this.dirIsEmpty()) {
-            System.out.println("Directory is empty");
-            return null;
+//            System.out.println("Directory is empty");
+            return result;
         }
         
-        File directory = new File(this.directoryPath);
-        String[] allFiles = directory.list();        
-        String result = allFiles[0];
-        for (String file : allFiles) {
+        Vector<String> files = this.getMatchedFiles();
+        
+        if (files.isEmpty())
+            return null;
+        
+        result = files.firstElement();
+        for (String file : files) {
             if (result.compareTo(file) > 0)
                 result = file;
         }
         result = this.directoryPath + "//" + result;
         System.out.println("Choose file: " + result);
+        
         return result;
     }
-    public boolean dirIsEmpty() {
+    private Vector<String> getMatchedFiles() {
+        
+        File directory = new File(this.directoryPath);
+        Vector<String> matchedFiles  = new Vector<String>();
+        
+        for (String fileName:directory.list()) {            
+            if (this.fileExtension.equals("")) {
+                if (!fileName.contains(this.fileExtension)) {
+                    continue;
+                }
+            }
+            matchedFiles.addElement(fileName);
+        }
+        return matchedFiles;
+    }
+    private boolean dirIsEmpty() {
         File directory = new File(this.directoryPath);
         String[] allFiles = directory.list();
         return allFiles.length < 1;
     }
-    public KVFile readAndRenderKVFile(String fileName) throws FileNotFoundException, IOException {
-           
-        BufferedInputStream file = new BufferedInputStream(new FileInputStream(fileName));
-        byte[] buf = new byte[file.available()];
-        file.read(buf, 0, file.available());
-        KVFile kvfile = new KVFile(fileName, buf);   
-        
-        System.out.println("Open file: " + kvfile.getName());
-        System.out.println("file size: " + kvfile.getSize());
-        
-        return kvfile;
-    }
-    public int pushToPhoenix(KVFile kvfile) {
-        
-        for (Sqlite4Record record:kvfile.toSqlite4Records()) {
-            this.sendAQuery(record);
-            
-        }
-        int SuccessedNumberOfRecord = 0;
-        return SuccessedNumberOfRecord;
-    }
-    public boolean sendAQuery(Sqlite4Record record) {
-        
-        for (Sqlite4Col col : record.getColumns()) {
-            col.show();
-            Sqlite4Decoder decoder = new Sqlite4Decoder();
-            System.out.println("  value: " + decoder.fromColToString(col));
-        }
-        return true;
-    }
     public void doJob(String Filename ) {
-        try{
-                KVFile kvfile = new KVFile(Filename);
-                kvfile.readAndRenderKVFile(Filename);                
-                this.pushToPhoenix(kvfile);
-                
-            } catch(IOException e) {
-                System.out.println("Do Job failed!");
-            }
-        System.out.println("Do Job successed!");
+        System.out.println("Do the job .");
     }
     public void keepWatchOnDirectoryAndDoJob() {
         
         while(true) {
             String fileName = this.chooseFile();
             
-            if (fileName == null) {
-                continue;
+            if (fileName != "") {
+                this.doJob(fileName);
+                this.deleteFile(fileName);
             }
             
-            this.doJob(fileName);
-            this.deleteFile(fileName);
             
-            break;
         }
     }
 //    public String observeDirectory() {
 //        
 //    }
     
-    public void deleteFile(String fileName) {
-        System.out.println("Delete " + fileName + ".");
+    public boolean deleteFile(String fileName) {
+        
+        File file = new File(fileName);
+        if (file.delete()) {
+            System.out.println(fileName + " is deleted .");
+            return true;
+        } 
+        
+        System.out.println(fileName + "deletion failed .");
+        return false;
     }
     
             
@@ -128,24 +123,23 @@ public class FileObserver {
     
     /**
      * @param args the command line arguments
+     * args[0]: is the file extension we watch
      */
     public static void main(String[] args) throws IOException {
-        // TODO code application logic here
-        FileObserver kvfileObserver = new FileObserver();
-        if( !kvfileObserver.setValidDirectoryPath("/tmp/KVoutput") )  {            
+        
+        FileObserver fileObserver = new FileObserver();
+        if( !fileObserver.setValidDirectoryPath("/tmp/KVoutput") )  {            
             return;
         }
         
-        kvfileObserver.keepWatchOnDirectoryAndDoJob();
-            
-//            try{
-//                KVFile kvf = fileObserver.readAndRenderKVFile("/tmp/KVoutput/2016_02_24_19:08:13_1.kv");
-//            }catch (FileNotFoundException e) {
-//                
-//            }catch (IOException e) {
-//                
-//            }
-            
+        if (args.length >0) {
+            String fileExtesion = args[0];
+            fileObserver.setFileExtension(fileExtesion);            
+        }
+        
+        fileObserver.setFileExtension("");
+        fileObserver.keepWatchOnDirectoryAndDoJob();
+        
     }
     
 }
