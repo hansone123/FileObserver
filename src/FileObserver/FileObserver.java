@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fileobserver;
+package FileObserver;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -86,8 +86,8 @@ public class FileObserver {
         String[] allFiles = directory.list();
         return allFiles.length < 1;
     }
-    public void doJob(String Filename ) {
-        System.out.println("Do the job .");
+    public void doJob(String FileName ) {
+        System.out.println("Do the job on " + FileName);
     }
     public void keepWatchOnDirectoryAndDoJob() {
         
@@ -114,32 +114,13 @@ public class FileObserver {
             return true;
         } 
         
-        System.out.println(fileName + "deletion failed .");
+        System.out.println("Delete " + fileName + " failed .");
         return false;
     }
     
             
     
     
-    /**
-     * @param args the command line arguments
-     * args[0]: is the file extension we watch
-     */
-    public static void main(String[] args) throws IOException {
-        
-        FileObserver fileObserver = new FileObserver();
-        if( !fileObserver.setValidDirectoryPath("/tmp/KVoutput") )  {            
-            return;
-        }
-        
-        if (args.length >0) {
-            String fileExtesion = args[0];
-            fileObserver.setFileExtension(fileExtesion);            
-        }
-        
-        fileObserver.setFileExtension("");
-        fileObserver.keepWatchOnDirectoryAndDoJob();
-        
-    }
+
     
 }
