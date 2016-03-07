@@ -41,7 +41,7 @@ public class KVFileObserver extends FileObserver{
         return SuccessedNumberOfRecord;
     }
     public boolean sendAQuery(Sqlite4Record record) {
-        
+        System.out.println("table id: " + record.getTableID());
         for (Sqlite4Col col : record.getColumns()) {
             col.show();
             Sqlite4Decoder decoder = new Sqlite4Decoder();

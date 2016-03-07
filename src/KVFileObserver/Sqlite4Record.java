@@ -16,6 +16,8 @@ public class Sqlite4Record {
     private String tableName;
     private Vector<Sqlite4Col> columns;
     public Sqlite4Record(){
+        this.tableID = -1;
+        this.tableName = "";
         this.columns = new Vector<Sqlite4Col>();
     }
     public void setTableName(String tableName) {
@@ -26,6 +28,12 @@ public class Sqlite4Record {
     }
     public void addColumn(Sqlite4Col col) {
         columns.addElement(col);
+    }
+    public String getTableName() {
+        return this.tableName;
+    }
+    public int getTableID() {
+        return this.tableID;
     }
     public Vector<Sqlite4Col> getColumns() {
         return this.columns;
