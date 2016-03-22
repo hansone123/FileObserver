@@ -6,6 +6,7 @@
 package test;
 
 import FileObserver.FileObserver;
+import FileObserver.Job.PrintFileNameJob;
 import java.io.IOException;
 
 /**
@@ -19,17 +20,24 @@ public class test {
      */
     public static void main(String[] args) throws IOException {
         
+        
+        String dirWatched;
+        String fileExtesion;
+        if (args.length == 2) {
+            dirWatched = args[0];
+            fileExtesion = args[1];
+        } else {
+            dirWatched = "testFiles";
+            fileExtesion = ".txt";
+        }
+        
         FileObserver fileObserver = new FileObserver();
-        if( !fileObserver.setValidDirectoryPath("/tmp/") )  {            
-            return;
+        if( !fileObserver.setValidDirectoryPath(dirWatched) )  {            
+                return;
         }
-        
-        if (args.length >0) {
-            String fileExtesion = args[0];
-            fileObserver.setFileExtension(fileExtesion);            
-        }
-        
-        fileObserver.setFileExtension("");
+        fileObserver.setFileExtension(fileExtesion);      
+        PrintFileNameJob job = new PrintFileNameJob();
+        fileObserver.setJob(job);
         fileObserver.keepWatchOnDirectoryAndDoJob();
         
     }
